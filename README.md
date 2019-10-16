@@ -1,6 +1,8 @@
 # GridConstructor
 PWA for helping artists creating perspective grids aiding all kinds of illustration work.
 
+Test page: https://farbrorgarbo.github.io/GridConstructor/
+
 > This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
 
 ## Available Scripts
