@@ -44,7 +44,7 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 ### `npm run deploy`
 
-This is for deploying the app to githug through gh-pages.
+This is for deploying the app to github through gh-pages.
 
 > If you fork this project, then remember to change the "homepage" and "deploy" settings in package.json
 
