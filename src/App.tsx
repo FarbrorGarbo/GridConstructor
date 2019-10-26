@@ -1,19 +1,17 @@
 import React from "react";
-import GridConstructor from './GridConstructor';
+import { Settings } from "./GCEngine";
+import GCView from "./GCView";
 import "./App.css";
 
-// const useSettings: React.FC<{ init?: string }> = (init) => {
-//   const localStorageData: string | null = localStorage.getItem("grid");
-//   const [value, setValue] = React.useState<any>(
-//       !localStorageData ? {} || init
-//     );
-//   React.useEffect(
-//     () => {
-//       localStorage.setItem("grid", JSON.stringify(value));
-//     }
-//   )
-//   return [value, setValue];
-// }
+const readSettings = (initial: Settings) => {
+	const localStorageData: string | null = localStorage.getItem("grid");
+
+	const value = !localStorageData
+			? initial
+			: JSON.parse(localStorageData);
+
+	return value;
+}
 
 type GenericNumberInputProps = {
 	label: string;
@@ -55,6 +53,18 @@ const GenericNumberInput: React.FC<GenericNumberInputProps> = (props) => {
 }
 
 const App: React.FC = () => {
+	// Load settings
+	const settings: Settings = readSettings(
+		{
+			rotation: 0,
+			elevation: 0,
+			distance: 1000,
+			picturePlane: 1000,
+			offsetH: Math.floor(window.innerWidth/2),
+			offsetV: Math.floor(window.innerHeight/2)
+		}
+	);
+
 	// Show/hide settings
 	const [showSettings, toggle] = React.useState(false);
 
@@ -64,12 +74,12 @@ const App: React.FC = () => {
 	}
 
 	// Settings
-	const [rotation, setRotation] = React.useState(25);
-	const [elevation, setElevation] = React.useState(20);
-	const [distance, setDistance] = React.useState(1000);
-	const [picturePlane, setPicturePlane] = React.useState(1000);
-	const [offsetH, setOffsetH] = React.useState(Math.floor(window.innerWidth/2));
-	const [offsetV, setOffsetV] = React.useState(Math.floor(window.innerHeight/2));
+	const [rotation, setRotation] = React.useState( settings.rotation );
+	const [elevation, setElevation] = React.useState( settings.elevation );
+	const [distance, setDistance] = React.useState( settings.distance );
+	const [picturePlane, setPicturePlane] = React.useState( settings.picturePlane);
+	const [offsetH, setOffsetH] = React.useState( settings.offsetH );
+	const [offsetV, setOffsetV] = React.useState( settings.offsetV );
 
 	const handleRotation = (value: number) => { setRotation(value) };
 	const handleElevation = (value: number) => { setElevation(value) };
@@ -78,15 +88,32 @@ const App: React.FC = () => {
 	const handleOffsetH = (value: number) => { setOffsetH(value) };
 	const handleOffsetV = (value: number) => { setOffsetV(value) };
 
-	// React.useEffect( () => { console.log(rotation)}, [rotation]);
-	// React.useEffect( () => { console.log(elevation)}, [elevation]);
+	React.useEffect(
+		() => { 
+			localStorage.setItem("grid", JSON.stringify(
+				{
+					rotation: rotation,
+					elevation: elevation,
+					distance: distance,
+					picturePlane: picturePlane,
+					offsetH: offsetH,
+					offsetV: offsetV
+				})
+			);
+		},
+		[rotation, elevation, distance, picturePlane, offsetH, offsetV]
+	);
 
 	return (
 		<div className="App">
-			<GridConstructor settings={{rotation: rotation, elevation: elevation, distance: distance, picturePlane: picturePlane, offsetH: offsetH, offsetV: offsetV}} />
+			<GCView settings={{rotation: rotation, elevation: elevation, distance: distance, picturePlane: picturePlane, offsetH: offsetH, offsetV: offsetV}} />
+
+			<div className="menu">
+				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>
+			</div>
+			
 			{showSettings &&
 			<div className={"settings"}>
-				<button onClick={toggleSettings}>{showSettings ? "Close" : "Settings"}</button>
 				<h2>Perspektive Settings</h2>
 				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={rotation} returnValue={(val) => handleRotation(val)} />
 				<GenericNumberInput label={"Elevation"} min={0} max={90} step={5} value={elevation} returnValue={(val) => handleElevation(val)} />
@@ -95,7 +122,6 @@ const App: React.FC = () => {
 				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={offsetH} returnValue={(val) => handleOffsetH(val)} />
 				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={offsetV} returnValue={(val) => handleOffsetV(val)} />
 			</div>}
-			{!showSettings && <button onClick={toggleSettings}>{showSettings ? "Close" : "Settings"}</button>}
 		</div>
 	);
 }

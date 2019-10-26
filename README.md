@@ -1,5 +1,5 @@
 # GridConstructor
-PWA for helping artists creating 3d perspective grids aiding all kinds of illustration work. This app is a work in progress and currently not i a state to be usefull. I mainly created this project to learn how to write a PWA and learn how to code with React Fuctional Components using Hooks and canvas.
+PWA for helping artists creating 3d perspective grids aiding all kinds of illustration work. This app is a work in progress and currently not in a state to be usefull. I mainly created this project to learn how to write a PWA and learn how to code with React Fuctional Components using Hooks and canvas.
 
 Test page: https://farbrorgarbo.github.io/GridConstructor/
 
