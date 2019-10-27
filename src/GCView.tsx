@@ -1,11 +1,12 @@
 import React from "react";
-import GCEngine, { Settings } from "./GCEngine";
+import GCEngine, { Settings, Drawing } from "./GCEngine";
 
 type ViewProps = {
-    settings: Settings
+	settings: Settings,
+	drawing?: Drawing
 }
 
-const GridConstructor: React.FC<ViewProps> = ({ settings }: ViewProps) => {
+const GridConstructor: React.FC<ViewProps> = ({ settings, drawing }: ViewProps) => {
 	const canvasElm = React.useRef<HTMLCanvasElement>(null);
 	const [canvasSize, setCanvasSize] = React.useState({width: window.innerWidth, height: window.innerHeight});
 	
@@ -92,6 +93,17 @@ const GridConstructor: React.FC<ViewProps> = ({ settings }: ViewProps) => {
 					ctx.lineTo(calcPointB.h, canvas.height - calcPointB.v);
 				});
 				ctx.stroke();
+
+				// Drawing
+				if (drawing) {
+					ctx.strokeStyle = "#000";
+					for (const key in drawing.points) {
+						const calc = GCEngine.project(settings, drawing.points[key]);
+						ctx.beginPath();
+						ctx.arc(calc.h, calc.v, 5, 0, 2 * Math.PI);
+						ctx.stroke();
+					}
+				}
 			}
 		}
 
@@ -105,7 +117,7 @@ const GridConstructor: React.FC<ViewProps> = ({ settings }: ViewProps) => {
 			window.removeEventListener('resize', onResize);
 		}
 	},
-	[settings, canvasSize]
+	[settings, canvasSize, drawing]
 	);
 
   	return (

@@ -60,4 +60,10 @@ export type Line = {
     end: Vec
 };
 
+export type Drawing = {
+    points: {
+        [key: string] : Vec
+    }
+}
+
 export default new GCEngine ();

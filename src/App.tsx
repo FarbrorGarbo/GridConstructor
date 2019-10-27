@@ -1,13 +1,27 @@
 import React from "react";
-import { Settings } from "./GCEngine";
+import { Settings, Drawing } from "./GCEngine";
 import GCView from "./GCView";
 import "./App.css";
 
 const readSettings = (initial: Settings) => {
-	const localStorageData: string | null = localStorage.getItem("grid");
+	const localStorageData: string | null = localStorage.getItem("gc_settings");
 
 	const value = !localStorageData
 			? initial
+			: JSON.parse(localStorageData);
+
+	return value;
+}
+
+const readCurrentDrawing = () => {
+	const localStorageData: string | null = localStorage.getItem("gc_current_drawing");
+
+	const value = !localStorageData
+			? {	// Default empty drawing with one point i origo
+				points: {
+					"x0_y0_z0": {x: 0, y: 0, z: 0}
+				}
+			}
 			: JSON.parse(localStorageData);
 
 	return value;
@@ -54,8 +68,8 @@ const GenericNumberInput: React.FC<GenericNumberInputProps> = (props) => {
 
 const App: React.FC = () => {
 	// Load settings
-	const settings: Settings = readSettings(
-		{
+	const loadedSettings: Settings = readSettings(
+		{	// Default settings
 			rotation: 0,
 			elevation: 0,
 			distance: 1000,
@@ -63,6 +77,33 @@ const App: React.FC = () => {
 			offsetH: Math.floor(window.innerWidth/2),
 			offsetV: Math.floor(window.innerHeight/2)
 		}
+	);
+
+	// Settings
+	const [settings, updateSettings] = React.useState<Settings>(loadedSettings);
+
+	const handleSettings = (key: string, value: number) => {
+		let settingsCopy: Settings = {...settings};
+		switch (key) {
+			case "rotation": settingsCopy.rotation = value; break;
+			case "elevation": settingsCopy.elevation = value; break;
+			case "distance": settingsCopy.distance = value; break;
+			case "picturePlane": settingsCopy.picturePlane = value; break;
+			case "offsetH": settingsCopy.offsetH = value; break;
+			case "offsetV": settingsCopy.offsetV = value; break;
+		}
+		if (JSON.stringify(settings) !== JSON.stringify(settingsCopy))
+			updateSettings(settingsCopy);
+	}
+
+	React.useEffect(
+		() => {
+			console.log("useEffekt", settings);
+			localStorage.setItem("gc_settings",
+			JSON.stringify(settings)
+			);
+		},
+		[settings]
 	);
 
 	// Show/hide settings
@@ -73,40 +114,18 @@ const App: React.FC = () => {
 		toggle(!showSettings);
 	}
 
-	// Settings
-	const [rotation, setRotation] = React.useState( settings.rotation );
-	const [elevation, setElevation] = React.useState( settings.elevation );
-	const [distance, setDistance] = React.useState( settings.distance );
-	const [picturePlane, setPicturePlane] = React.useState( settings.picturePlane);
-	const [offsetH, setOffsetH] = React.useState( settings.offsetH );
-	const [offsetV, setOffsetV] = React.useState( settings.offsetV );
-
-	const handleRotation = (value: number) => { setRotation(value) };
-	const handleElevation = (value: number) => { setElevation(value) };
-	const handleDistance = (value: number) => { setDistance(value) };
-	const handlePicturePlane = (value: number) => { setPicturePlane(value) };
-	const handleOffsetH = (value: number) => { setOffsetH(value) };
-	const handleOffsetV = (value: number) => { setOffsetV(value) };
+	// Drawing "document"
+	const loadedDrawing: Drawing = readCurrentDrawing();
+	const [drawing] = React.useState<Drawing>(loadedDrawing);
 
 	React.useEffect(
-		() => { 
-			localStorage.setItem("grid", JSON.stringify(
-				{
-					rotation: rotation,
-					elevation: elevation,
-					distance: distance,
-					picturePlane: picturePlane,
-					offsetH: offsetH,
-					offsetV: offsetV
-				})
-			);
-		},
-		[rotation, elevation, distance, picturePlane, offsetH, offsetV]
+		() => {console.log(drawing)},
+		[drawing]
 	);
 
 	return (
 		<div className="App">
-			<GCView settings={{rotation: rotation, elevation: elevation, distance: distance, picturePlane: picturePlane, offsetH: offsetH, offsetV: offsetV}} />
+			<GCView settings={settings} drawing={drawing} />
 
 			<div className="menu">
 				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>
@@ -115,12 +134,12 @@ const App: React.FC = () => {
 			{showSettings &&
 			<div className={"settings"}>
 				<h2>Perspektive Settings</h2>
-				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={rotation} returnValue={(val) => handleRotation(val)} />
-				<GenericNumberInput label={"Elevation"} min={0} max={90} step={5} value={elevation} returnValue={(val) => handleElevation(val)} />
-				<GenericNumberInput label={"Distance"} min={0} max={999999} step={50} value={distance} returnValue={(val) => handleDistance(val)} />
-				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={picturePlane} returnValue={(val) => handlePicturePlane(val)} />
-				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={offsetH} returnValue={(val) => handleOffsetH(val)} />
-				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={offsetV} returnValue={(val) => handleOffsetV(val)} />
+				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={settings.rotation} returnValue={(val) => handleSettings("rotation", val)} />
+				<GenericNumberInput label={"Elevation"} min={0} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />
+				<GenericNumberInput label={"Distance"} min={0} max={999999} step={50} value={settings.distance} returnValue={(val) => handleSettings("distance", val)} />
+				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={settings.picturePlane} returnValue={(val) => handleSettings("rotapicturePlane", val)} />
+				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={settings.offsetH} returnValue={(val) => handleSettings("offsetH", val)} />
+				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={settings.offsetV} returnValue={(val) => handleSettings("offsetV", val)} />
 			</div>}
 		</div>
 	);
