@@ -74,8 +74,9 @@ const App: React.FC = () => {
 			elevation: 0,
 			distance: 1000,
 			picturePlane: 1000,
-			offsetH: Math.floor(window.innerWidth/2),
-			offsetV: Math.floor(window.innerHeight/2)
+			offsetH: 1754,
+			offsetV: 1240,
+			docSize: {width: 3508, height: 2480}
 		}
 	);
 
@@ -98,7 +99,7 @@ const App: React.FC = () => {
 
 	React.useEffect(
 		() => {
-			console.log("useEffekt", settings);
+			// console.log("useEffekt", settings);
 			localStorage.setItem("gc_settings",
 			JSON.stringify(settings)
 			);
@@ -137,7 +138,7 @@ const App: React.FC = () => {
 				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={settings.rotation} returnValue={(val) => handleSettings("rotation", val)} />
 				<GenericNumberInput label={"Elevation"} min={0} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />
 				<GenericNumberInput label={"Distance"} min={0} max={999999} step={50} value={settings.distance} returnValue={(val) => handleSettings("distance", val)} />
-				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={settings.picturePlane} returnValue={(val) => handleSettings("rotapicturePlane", val)} />
+				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={settings.picturePlane} returnValue={(val) => handleSettings("picturePlane", val)} />
 				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={settings.offsetH} returnValue={(val) => handleSettings("offsetH", val)} />
 				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={settings.offsetV} returnValue={(val) => handleSettings("offsetV", val)} />
 			</div>}
