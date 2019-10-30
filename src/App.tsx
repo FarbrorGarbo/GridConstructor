@@ -1,21 +1,20 @@
 import React from "react";
-import { Settings, Drawing } from "./GCEngine";
+import GCEngine, {Settings, Drawing} from "./GCEngine";
 import GCView from "./GCView";
 import "./App.css";
 
-const readSettings = (initial: Settings) => {
+const getPersistentSettings = () => {
+	// localStorage.setItem("gc_settings", "");
 	const localStorageData: string | null = localStorage.getItem("gc_settings");
-
 	const value = !localStorageData
-			? initial
+			? GCEngine.getSettings()
 			: JSON.parse(localStorageData);
 
 	return value;
 }
 
-const readCurrentDrawing = () => {
+const readPersistentDrawing = () => {
 	const localStorageData: string | null = localStorage.getItem("gc_current_drawing");
-
 	const value = !localStorageData
 			? {	// Default empty drawing with one point i origo
 				points: {
@@ -25,6 +24,102 @@ const readCurrentDrawing = () => {
 			: JSON.parse(localStorageData);
 
 	return value;
+}
+
+const App: React.FC = () => {
+	// Settings
+	const [settings, updateSettings] = React.useState<Settings>(getPersistentSettings());
+
+	const handleSettings = (key: string, value: number) => {
+		if (settings) {
+			let settingsCopy: Settings = {...settings};
+		switch (key) {
+			case "rotation": settingsCopy.rotation = value; break;
+			case "elevation": settingsCopy.elevation = value; break;
+			case "distance": settingsCopy.distance = value; break;
+			case "picturePlane": settingsCopy.picturePlane = value; break;
+			case "offsetH": settingsCopy.offsetH = value; break;
+			case "offsetV": settingsCopy.offsetV = value; break;
+		}
+		if (JSON.stringify(settings) !== JSON.stringify(settingsCopy))
+			updateSettings(settingsCopy);
+		}
+	}
+
+	React.useEffect(
+		() => { localStorage.setItem("gc_settings", JSON.stringify(settings)) },
+		[settings]
+	);
+
+	// Show/hide settings
+	const [showSettings, toggle] = React.useState(false);
+
+	const toggleSettings = (event: any) => {
+		event.preventDefault();
+		toggle(!showSettings);
+	}
+
+	// Drawing "document"
+	const [drawing] = React.useState<Drawing>(readPersistentDrawing());
+
+	// Pan
+	const [mousePos, mouseMoved] = React.useState<{x: number, y: number} | null>(null);
+
+	const handleMouseMove = (event: React.MouseEvent) => {
+		if (event.buttons === 1) {
+			mouseMoved({x: event.movementX, y: event.movementY});
+		} else if (mousePos) {
+			mouseMoved(null);
+		}
+	}
+
+	// Zoom
+	const [scale, setScale] = React.useState(1);
+
+	const handleZoom = (event: React.WheelEvent) => {
+		setScale(scale - event.deltaY * 0.001);
+	}
+
+	React.useEffect(
+		() => {
+			mousePos && GCEngine.pan(mousePos.x, mousePos.y);
+			GCEngine.setScale(scale);
+			GCEngine.draw(settings, drawing);
+
+			const onResize = () => {
+				GCEngine.setCanvasSize();
+				GCEngine.draw(settings, drawing);
+			}
+	
+			window.addEventListener('resize', onResize);
+	
+			return () => {
+				window.removeEventListener('resize', onResize);
+			}
+		},
+		[mousePos, scale, settings, drawing]
+	);
+
+	return (
+		<div className="App" onMouseMove={(e) => handleMouseMove(e)} onWheel={(e) => handleZoom(e)} >
+			<GCView settings={settings} drawing={drawing} />
+
+			<div className="menu">
+				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>
+			</div>
+
+			{showSettings &&
+			<div className={"settings"}>
+				<h2>Perspektive Settings</h2>
+				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={settings.rotation} returnValue={(val) => handleSettings("rotation", val)} />
+				<GenericNumberInput label={"Elevation"} min={0} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />
+				<GenericNumberInput label={"Distance"} min={0} max={999999} step={50} value={settings.distance} returnValue={(val) => handleSettings("distance", val)} />
+				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={settings.picturePlane} returnValue={(val) => handleSettings("picturePlane", val)} />
+				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={settings.offsetH} returnValue={(val) => handleSettings("offsetH", val)} />
+				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={settings.offsetV} returnValue={(val) => handleSettings("offsetV", val)} />
+			</div>}
+		</div>
+	);
 }
 
 type GenericNumberInputProps = {
@@ -63,86 +158,6 @@ const GenericNumberInput: React.FC<GenericNumberInputProps> = (props) => {
 				value={value.toString()}
 			/>
 		</label>
-	);
-}
-
-const App: React.FC = () => {
-	// Load settings
-	const loadedSettings: Settings = readSettings(
-		{	// Default settings
-			rotation: 0,
-			elevation: 0,
-			distance: 1000,
-			picturePlane: 1000,
-			offsetH: 1754,
-			offsetV: 1240,
-			docSize: {width: 3508, height: 2480}
-		}
-	);
-
-	// Settings
-	const [settings, updateSettings] = React.useState<Settings>(loadedSettings);
-
-	const handleSettings = (key: string, value: number) => {
-		let settingsCopy: Settings = {...settings};
-		switch (key) {
-			case "rotation": settingsCopy.rotation = value; break;
-			case "elevation": settingsCopy.elevation = value; break;
-			case "distance": settingsCopy.distance = value; break;
-			case "picturePlane": settingsCopy.picturePlane = value; break;
-			case "offsetH": settingsCopy.offsetH = value; break;
-			case "offsetV": settingsCopy.offsetV = value; break;
-		}
-		if (JSON.stringify(settings) !== JSON.stringify(settingsCopy))
-			updateSettings(settingsCopy);
-	}
-
-	React.useEffect(
-		() => {
-			// console.log("useEffekt", settings);
-			localStorage.setItem("gc_settings",
-			JSON.stringify(settings)
-			);
-		},
-		[settings]
-	);
-
-	// Show/hide settings
-	const [showSettings, toggle] = React.useState(false);
-
-	function toggleSettings (event: any) {
-		event.preventDefault();
-		toggle(!showSettings);
-	}
-
-	// Drawing "document"
-	const loadedDrawing: Drawing = readCurrentDrawing();
-	const [drawing] = React.useState<Drawing>(loadedDrawing);
-
-	React.useEffect(
-		() => {console.log(drawing)},
-		[drawing]
-	);
-
-	return (
-		<div className="App">
-			<GCView settings={settings} drawing={drawing} />
-
-			<div className="menu">
-				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>
-			</div>
-			
-			{showSettings &&
-			<div className={"settings"}>
-				<h2>Perspektive Settings</h2>
-				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={settings.rotation} returnValue={(val) => handleSettings("rotation", val)} />
-				<GenericNumberInput label={"Elevation"} min={0} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />
-				<GenericNumberInput label={"Distance"} min={0} max={999999} step={50} value={settings.distance} returnValue={(val) => handleSettings("distance", val)} />
-				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={settings.picturePlane} returnValue={(val) => handleSettings("picturePlane", val)} />
-				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={settings.offsetH} returnValue={(val) => handleSettings("offsetH", val)} />
-				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={settings.offsetV} returnValue={(val) => handleSettings("offsetV", val)} />
-			</div>}
-		</div>
 	);
 }
 
