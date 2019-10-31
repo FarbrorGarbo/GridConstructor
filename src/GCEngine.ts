@@ -109,14 +109,40 @@ class GCEngine {
         if (this._canvasElm && this._cxt) {
 			this._canvasElm.width = window.innerWidth; // settings.viewPortSize.width;
             this._canvasElm.height = window.innerHeight; // settings.viewPortSize.height;
-            
-            this._cxt.clearRect(0, 0, this._canvasElm.width, this._canvasElm.height);
 
-            // Draw document background
+            // Clear by drawing document background
             this._cxt.fillStyle = "rgb(231, 230, 227)";
             this._cxt.fillRect(0, 0, this._canvasElm.width, this._canvasElm.height);
-            this._cxt.strokeStyle = "#f00";
 
+            // Draw size of document
+            let settings = {...this._settings};
+            settings.rotation = 0;
+            settings.elevation = 0;
+            settings.picturePlane = settings.distance;
+            this._cxt.fillStyle = "rgb(245,245,245)";
+            const calcPoint1 = this._project(settings, {x:0, y:0, z:settings.docSize.height});
+            const calcPoint2 = this._project(settings, {x:settings.docSize.width, y:0, z:0});
+            this._cxt.fillRect(calcPoint1.h - settings.offsetH * this._scale, this._canvasElm!.height - calcPoint1.v + settings.offsetV * this._scale, calcPoint2.h - calcPoint1.h, calcPoint1.v - calcPoint2.v);
+
+            this._cxt.strokeStyle = "#aaa";
+            const lines = [
+                [{x:0, y:0, z:0}, {x:settings.docSize.width, y:0, z: 0}],
+                [{x:0, y:0, z:settings.docSize.height}, {x:settings.docSize.width, y:0, z: settings.docSize.height}],
+                [{x:0, y:0, z:0}, {x:0, y:0, z: this._settings.docSize.height}],
+                [{x:settings.docSize.width, y:0, z:0}, {x:settings.docSize.width, y:0, z: settings.docSize.height}],
+            ]
+
+            lines.forEach(line => {
+                const calcPointA = this._project(settings, line[0]);
+                const calcPointB = this._project(settings, line[1]);
+                this._cxt!.beginPath();
+                this._cxt!.moveTo(calcPointA.h - settings.offsetH * this._scale, this._canvasElm!.height - calcPointA.v + settings.offsetV * this._scale);
+                this._cxt!.lineTo(calcPointB.h - settings.offsetH * this._scale, this._canvasElm!.height - calcPointB.v + settings.offsetV * this._scale);
+                this._cxt!.stroke();
+            });
+
+            // Gizmo
+            this._cxt.strokeStyle = "#f00";
             const xLines = [
                 [{x:0, y:0, z:0}, {x:500, y:0, z:0}],
                 [{x:480, y:0, z:5}, {x:500, y:0, z:0}]
