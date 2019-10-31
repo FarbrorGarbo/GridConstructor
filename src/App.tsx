@@ -1,34 +1,11 @@
 import React from "react";
-import GCEngine, {Settings, Drawing} from "./GCEngine";
+import GCEngine, {Settings} from "./GCEngine";
 import GCView from "./GCView";
 import "./App.css";
 
-const getPersistentSettings = () => {
-	// localStorage.setItem("gc_settings", "");
-	const localStorageData: string | null = localStorage.getItem("gc_settings");
-	const value = !localStorageData
-			? GCEngine.getSettings()
-			: JSON.parse(localStorageData);
-
-	return value;
-}
-
-const readPersistentDrawing = () => {
-	const localStorageData: string | null = localStorage.getItem("gc_current_drawing");
-	const value = !localStorageData
-			? {	// Default empty drawing with one point i origo
-				points: {
-					"x0_y0_z0": {x: 0, y: 0, z: 0}
-				}
-			}
-			: JSON.parse(localStorageData);
-
-	return value;
-}
-
 const App: React.FC = () => {
 	// Settings
-	const [settings, updateSettings] = React.useState<Settings>(getPersistentSettings());
+	const [settings, updateSettings] = React.useState<Settings>(GCEngine.getSettings());
 
 	const handleSettings = (key: string, value: number) => {
 		if (settings) {
@@ -47,7 +24,7 @@ const App: React.FC = () => {
 	}
 
 	React.useEffect(
-		() => { localStorage.setItem("gc_settings", JSON.stringify(settings)) },
+		() => { GCEngine.setSettings(settings) },
 		[settings]
 	);
 
@@ -58,9 +35,6 @@ const App: React.FC = () => {
 		event.preventDefault();
 		toggle(!showSettings);
 	}
-
-	// Drawing "document"
-	const [drawing] = React.useState<Drawing>(readPersistentDrawing());
 
 	// Pan
 	const [mousePos, mouseMoved] = React.useState<{x: number, y: number} | null>(null);
@@ -77,18 +51,24 @@ const App: React.FC = () => {
 	const [scale, setScale] = React.useState(1);
 
 	const handleZoom = (event: React.WheelEvent) => {
-		setScale(scale - event.deltaY * 0.001);
+		let newScale = scale - event.deltaY * 0.0005;
+		if (newScale < 0.2) newScale = 0.2;
+		setScale(newScale);
 	}
+
+	React.useEffect(
+		() => { GCEngine.setScale(scale) },
+		[scale]
+	);
 
 	React.useEffect(
 		() => {
 			mousePos && GCEngine.pan(mousePos.x, mousePos.y);
-			GCEngine.setScale(scale);
-			GCEngine.draw(settings, drawing);
+			GCEngine.draw();
 
 			const onResize = () => {
 				GCEngine.setCanvasSize();
-				GCEngine.draw(settings, drawing);
+				GCEngine.draw();
 			}
 	
 			window.addEventListener('resize', onResize);
@@ -97,12 +77,12 @@ const App: React.FC = () => {
 				window.removeEventListener('resize', onResize);
 			}
 		},
-		[mousePos, scale, settings, drawing]
+		[mousePos, settings]
 	);
 
 	return (
 		<div className="App" onMouseMove={(e) => handleMouseMove(e)} onWheel={(e) => handleZoom(e)} >
-			<GCView settings={settings} drawing={drawing} />
+			<GCView/>
 
 			<div className="menu">
 				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>

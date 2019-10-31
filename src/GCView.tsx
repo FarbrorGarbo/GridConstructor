@@ -1,12 +1,7 @@
 import React from "react";
-import GCEngine, { Settings, Drawing } from "./GCEngine";
+import GCEngine from "./GCEngine";
 
-type ViewProps = {
-	settings: Settings,
-	drawing?: Drawing
-}
-
-const GCView: React.FC<ViewProps> = ({ settings, drawing }: ViewProps) => {
+const GCView: React.FC = () => {
 	const canvasElm = React.useRef<HTMLCanvasElement>(null);
 
 	// Lifecycle ComponentDidMount: should only occur once and give us a persistant ref to the canvas.
@@ -19,10 +14,7 @@ const GCView: React.FC<ViewProps> = ({ settings, drawing }: ViewProps) => {
 	}, []);
 
   	return (
-		<canvas
-			className={"canvas"}
-			ref={canvasElm}
-		/>
+		<canvas className={"canvas"} ref={canvasElm} />
   	);
 }
 
