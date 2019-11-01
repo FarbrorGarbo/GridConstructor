@@ -56,32 +56,33 @@ class GCEngine {
       return degrees * (Math.PI / 180);
     }
 
+    private _drawLine(settings: Settings, useScale: boolean = true, line: Line, color: string) {
+        const calcPointA = this._project(settings, line.start, useScale);
+        const calcPointB = this._project(settings, line.end, useScale);
+        this._cxt!.strokeStyle = color;
+        this._cxt!.beginPath();
+        this._cxt!.moveTo(calcPointA.h, this._canvasElm!.height - calcPointA.v);
+        this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
+        this._cxt!.stroke();
+    };
+
     private _drawGizmo() {
         if (!this._cxt) return;
         let settings = {...this._settings};
         settings.distance = 1000;
         settings.picturePlane = 1000;
 
-        const drawAxis = (lines: Line[]) => {
+        const drawAxis = (color: string, lines: Line[]) => {
+            this._cxt!.strokeStyle = color;
             lines.forEach(line => {
-                const calcPointA = this._project(settings, line.start, false);
-                const calcPointB = this._project(settings, line.end, false);
-                this._cxt!.beginPath();
-                this._cxt!.moveTo(calcPointA.h, this._canvasElm!.height - calcPointA.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
-                this._cxt!.stroke();
+                this._drawLine(settings, false, line, color);
             });
         }
 
         const lines = gizmoLines();
-
-        this._cxt.strokeStyle = "#f00";
-        drawAxis(lines[0]);
-        this._cxt.strokeStyle = "#0f0";
-        drawAxis(lines[1]);
-        this._cxt.strokeStyle = "#00f";
-        drawAxis(lines[2]);
+        drawAxis("#f00", lines[0]);
+        drawAxis("#0f0", lines[1]);
+        drawAxis("#00f", lines[2]);
     }
 
     private _project (settings: Settings = this._settings, point: Vec, useScale: boolean = true) : Point {
@@ -195,10 +196,7 @@ class GCEngine {
                 [{x:100, y:-100, z:-100}, {x:100, y:100, z:-100}]
             ]
             cubeLines.forEach(line => {
-                const calcPointA = this._project(this._settings, line[0]);
-                const calcPointB = this._project(this._settings, line[1]);
-                this._cxt!.moveTo(calcPointA.h, this._canvasElm!.height - calcPointA.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
+                this._drawLine(this._settings, true, {start: line[0], end: line[1]}, "#aaa");
             });
             this._cxt.stroke();
 

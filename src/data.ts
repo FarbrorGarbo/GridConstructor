@@ -1,4 +1,4 @@
-import {Vec, Line} from "./GCEngine";
+import {Line} from "./GCEngine";
 
 export const gizmoLines = (): Line[][] => {
 	return [
