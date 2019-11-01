@@ -92,7 +92,7 @@ const App: React.FC = () => {
 			<div className={"settings"}>
 				<h2>Perspektive Settings</h2>
 				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={settings.rotation} returnValue={(val) => handleSettings("rotation", val)} />
-				<GenericNumberInput label={"Elevation"} min={0} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />
+				<GenericNumberInput label={"Elevation"} min={-90} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />
 				<GenericNumberInput label={"Distance"} min={0} max={999999} step={50} value={settings.distance} returnValue={(val) => handleSettings("distance", val)} />
 				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={settings.picturePlane} returnValue={(val) => handleSettings("picturePlane", val)} />
 				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={settings.offsetH} returnValue={(val) => handleSettings("offsetH", val)} />

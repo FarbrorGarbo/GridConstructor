@@ -1,4 +1,5 @@
 // The GridConstructor 3d engine
+import {gizmoLines} from "./data";
 
 class GCEngine {
     private _settings: Settings;
@@ -38,7 +39,7 @@ class GCEngine {
         return value;
     }
     
-    _readPersistentDrawing = () => {
+    private _readPersistentDrawing = () => {
         const localStorageData: string | null = localStorage.getItem("gc_current_drawing");
         const value = !localStorageData
                 ? {	// Default empty drawing with one point i origo
@@ -55,7 +56,35 @@ class GCEngine {
       return degrees * (Math.PI / 180);
     }
 
-    private _project (settings: Settings = this._settings, point: Vec) : Point {
+    private _drawGizmo() {
+        if (!this._cxt) return;
+        let settings = {...this._settings};
+        settings.distance = 1000;
+        settings.picturePlane = 1000;
+
+        const drawAxis = (lines: Line[]) => {
+            lines.forEach(line => {
+                const calcPointA = this._project(settings, line.start, false);
+                const calcPointB = this._project(settings, line.end, false);
+                this._cxt!.beginPath();
+                this._cxt!.moveTo(calcPointA.h, this._canvasElm!.height - calcPointA.v);
+                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
+                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
+                this._cxt!.stroke();
+            });
+        }
+
+        const lines = gizmoLines();
+
+        this._cxt.strokeStyle = "#f00";
+        drawAxis(lines[0]);
+        this._cxt.strokeStyle = "#0f0";
+        drawAxis(lines[1]);
+        this._cxt.strokeStyle = "#00f";
+        drawAxis(lines[2]);
+    }
+
+    private _project (settings: Settings = this._settings, point: Vec, useScale: boolean = true) : Point {
         const rot = this._degrees_to_radians(settings.rotation);
         const elev = this._degrees_to_radians(settings.elevation);
         const n = point.x * Math.sin(rot) + point.y * Math.cos(rot);
@@ -64,7 +93,9 @@ class GCEngine {
         const c = n * Math.sin(elev) + point.z * Math.cos(elev);
         const H = settings.picturePlane * a / (settings.distance + b); // + settings.offsetH;
         const V = settings.picturePlane * c / (settings.distance + b); // + settings.offsetV;
-        return {h: H * this._scale + this._pan.h, v: V * this._scale - this._pan.v};
+
+        if (useScale)  return {h: H * this._scale + this._pan.h, v: V * this._scale - this._pan.v};
+        return {h: H + this._pan.h, v: V - this._pan.v};
     }
 
     public getSettings(): Settings {
@@ -142,50 +173,7 @@ class GCEngine {
             });
 
             // Gizmo
-            this._cxt.strokeStyle = "#f00";
-            const xLines = [
-                [{x:0, y:0, z:0}, {x:500, y:0, z:0}],
-                [{x:480, y:0, z:5}, {x:500, y:0, z:0}]
-            ]
-            xLines.forEach(line => {
-                const calcPointA = this._project(this._settings, line[0]);
-                const calcPointB = this._project(this._settings, line[1]);
-                this._cxt!.beginPath();
-                this._cxt!.moveTo(calcPointA.h, this._canvasElm!.height - calcPointA.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
-                this._cxt!.stroke();
-            });
-
-            this._cxt.strokeStyle = "#0f0";
-            const yLines = [
-                [{x:0, y:0, z:0}, {x:0, y:500, z:0}],
-                [{x:5, y:480, z:0}, {x:0, y:500, z:0}]
-            ]
-            yLines.forEach(line => {
-                const calcPointA = this._project(this._settings, line[0]);
-                const calcPointB = this._project(this._settings, line[1]);
-                this._cxt!.beginPath();
-                this._cxt!.moveTo(calcPointA.h, this._canvasElm!.height - calcPointA.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
-                this._cxt!.stroke();
-            });
-
-            this._cxt.strokeStyle = "#00f";
-            const zLines = [
-                [{x:0, y:0, z:0}, {x:0, y:0, z:500}],
-                [{x:5, y:0, z:480}, {x:0, y:0, z:500}]
-            ]
-            zLines.forEach(line => {
-                const calcPointA = this._project(this._settings, line[0]);
-                const calcPointB = this._project(this._settings, line[1]);
-                this._cxt!.beginPath();
-                this._cxt!.moveTo(calcPointA.h, this._canvasElm!.height - calcPointA.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
-                this._cxt!.lineTo(calcPointB.h, this._canvasElm!.height - calcPointB.v);
-                this._cxt!.stroke();
-            });
+            this._drawGizmo();
 
             this._cxt.strokeStyle = "#aaa";
             this._cxt.beginPath();
@@ -204,12 +192,7 @@ class GCEngine {
                 [{x:-100, y:-100, z:100}, {x:-100, y:100, z:100}],
                 [{x:100, y:-100, z:100}, {x:100, y:100, z:100}],
                 [{x:-100, y:-100, z:-100}, {x:-100, y:100, z:-100}],
-                [{x:100, y:-100, z:-100}, {x:100, y:100, z:-100}],
-
-                // [{x:-297/2, y:0, z:-210/2}, {x:297/2, y:0, z:-210/2}],
-                // [{x:-297/2, y:0, z:210/2}, {x:297/2, y:0, z:210/2}],
-                // [{x:-297/2, y:0, z:-210/2}, {x:-297/2, y:0, z:210/2}],
-                // [{x:297/2, y:0, z:-210/2}, {x:297/2, y:0, z:210/2}]
+                [{x:100, y:-100, z:-100}, {x:100, y:100, z:-100}]
             ]
             cubeLines.forEach(line => {
                 const calcPointA = this._project(this._settings, line[0]);
