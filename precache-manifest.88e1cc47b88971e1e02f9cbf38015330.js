@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "d21ab3ecb315f4df27034ac097055b5b",
+    "revision": "4acc1f740f05d9e379dd33a75070d2ff",
     "url": "/GridConstructor/index.html"
   },
   {
-    "revision": "ba58b8fcf858e3eb0f09",
+    "revision": "5a62bd242d20a61b3711",
     "url": "/GridConstructor/static/css/main.70ecab7a.chunk.css"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/GridConstructor/static/js/2.354d63f7.chunk.js"
   },
   {
-    "revision": "ba58b8fcf858e3eb0f09",
-    "url": "/GridConstructor/static/js/main.4c081b41.chunk.js"
+    "revision": "5a62bd242d20a61b3711",
+    "url": "/GridConstructor/static/js/main.e3f5f35f.chunk.js"
   },
   {
     "revision": "dc7263dcc89424a6ff7b",
