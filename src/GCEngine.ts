@@ -115,6 +115,10 @@ class GCEngine {
         }
     }
 
+    public getScale() {
+        return this._scale;
+    }
+
     public setScale(scale: number) {
         this._scale = scale;
         this.draw();

@@ -1,5 +1,6 @@
 body {
   background-color: rgb(151, 141, 127);
+  touch-action: none;
 }
 
 h2 {

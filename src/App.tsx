@@ -51,6 +51,7 @@ const App: React.FC = () => {
 	const [scale, setScale] = React.useState(1);
 
 	const handleZoom = (event: React.WheelEvent) => {
+		// console.log(event.deltaY);
 		let newScale = scale - event.deltaY * 0.0005;
 		if (newScale < 0.2) newScale = 0.2;
 		setScale(newScale);
