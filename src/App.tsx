@@ -117,8 +117,8 @@ const App: React.FC = () => {
 			setTouchDistance(delta);
 			setLastTouchDistance(distance);
 		} else {
-			const deltaX = event.touches[0].clientX - touchRefPoint[0];
-			const deltaY = event.touches[0].clientY - touchRefPoint[1];
+			const deltaX = Math.ceil(event.touches[0].clientX - touchRefPoint[0]);
+			const deltaY = Math.ceil(event.touches[0].clientY - touchRefPoint[1]);
 			setTouchRefPoint([touchRefPoint[0] + deltaX, touchRefPoint[1] + deltaY]);
 			setTouchMovement([deltaX, deltaY]);
 			setTouchDistance(0);
@@ -134,7 +134,7 @@ const App: React.FC = () => {
 				if (newScale < 0.2) newScale = 0.2;
 				GCEngine.setScale(newScale);
 			} else {
-				touchMovement[0] !== 0 && touchMovement[1] !== 0 && GCEngine.pan(touchMovement[0], touchMovement[1]);
+				touchMovement[0] !== 0 && touchMovement[1] !== 0 && GCEngine.pan(touchMovement[0] * window.devicePixelRatio, touchMovement[1] * window.devicePixelRatio);
 				GCEngine.draw();
 			}
 		},
