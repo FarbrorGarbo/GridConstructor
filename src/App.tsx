@@ -102,19 +102,17 @@ const App: React.FC = () => {
 	const handleTouchEnd = (event: React.TouchEvent) => {
 		if (event.touches.length === 1) {
 			setTouchDistance(0);
+			setLastTouchDistance(0);
 			setTouchRefPoint([event.touches[0].clientX, event.touches[0].clientY]);
 		}
-		if (event.touches.length === 0) {
-			setTouchMovement([0, 0]);
-		}
+		setTouchMovement([0, 0]);
 	}
 
 	const handleTouchMove = (event: React.TouchEvent) => {
-		if (touchRefPoint[0] === -1) return;
 		if (event.touches.length > 1) {
-			const deltaX = event.touches[1].clientX - event.touches[0].clientX;
-			const deltaY = event.touches[1].clientY - event.touches[0].clientY;
-			const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+			const deltaX2 = event.touches[1].clientX - event.touches[0].clientX;
+			const deltaY2 = event.touches[1].clientY - event.touches[0].clientY;
+			const distance = Math.sqrt(deltaX2 * deltaX2 + deltaY2 * deltaY2);
 			const delta = distance - lastTouchDistance;
 			setTouchDistance(delta);
 			setLastTouchDistance(distance);
@@ -123,6 +121,8 @@ const App: React.FC = () => {
 			const deltaY = event.touches[0].clientY - touchRefPoint[1];
 			setTouchRefPoint([touchRefPoint[0] + deltaX, touchRefPoint[1] + deltaY]);
 			setTouchMovement([deltaX, deltaY]);
+			setTouchDistance(0);
+			setLastTouchDistance(0);
 		}
 	}
 
@@ -157,7 +157,7 @@ const App: React.FC = () => {
 			</div>
 
 			{showSettings &&
-			<div className={"settings"}>
+			<div className={"settings"} onMouseDown={e => e.stopPropagation()} onMouseMove={e => e.stopPropagation()}>
 				<h2>Perspektive Settings</h2>
 				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={settings.rotation} returnValue={(val) => handleSettings("rotation", val)} />
 				<GenericNumberInput label={"Elevation"} min={-90} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />

@@ -136,6 +136,18 @@ class GCEngine {
             this._canvasElm.height = window.innerHeight;
             this._cxt = this._canvasElm.getContext("2d");
             this._scale = 1;
+
+            document.addEventListener(
+                "touchstart",
+                function(e){ e.preventDefault() },
+                {passive: false}
+            );
+
+            this._canvasElm.addEventListener(
+                "touchstart",
+                function(e){ e.preventDefault() },
+                {passive: false}
+            );
         } else {
             console.warn("Registered canvase element is not of type <canvas>!");
         }
