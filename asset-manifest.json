@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/GridConstructor/static/css/main.70ecab7a.chunk.css",
-    "main.js": "/GridConstructor/static/js/main.e2710b1d.chunk.js",
-    "main.js.map": "/GridConstructor/static/js/main.e2710b1d.chunk.js.map",
+    "main.js": "/GridConstructor/static/js/main.7531b87b.chunk.js",
+    "main.js.map": "/GridConstructor/static/js/main.7531b87b.chunk.js.map",
     "runtime-main.js": "/GridConstructor/static/js/runtime-main.a3279992.js",
     "runtime-main.js.map": "/GridConstructor/static/js/runtime-main.a3279992.js.map",
     "static/js/2.354d63f7.chunk.js": "/GridConstructor/static/js/2.354d63f7.chunk.js",
     "static/js/2.354d63f7.chunk.js.map": "/GridConstructor/static/js/2.354d63f7.chunk.js.map",
     "index.html": "/GridConstructor/index.html",
-    "precache-manifest.897c3b7e755c4869e96c917a365cc729.js": "/GridConstructor/precache-manifest.897c3b7e755c4869e96c917a365cc729.js",
+    "precache-manifest.c801947866ddf92d7a7769991ec2d9f3.js": "/GridConstructor/precache-manifest.c801947866ddf92d7a7769991ec2d9f3.js",
     "service-worker.js": "/GridConstructor/service-worker.js",
     "static/css/main.70ecab7a.chunk.css.map": "/GridConstructor/static/css/main.70ecab7a.chunk.css.map"
   },
@@ -16,6 +16,6 @@
     "static/js/runtime-main.a3279992.js",
     "static/js/2.354d63f7.chunk.js",
     "static/css/main.70ecab7a.chunk.css",
-    "static/js/main.e2710b1d.chunk.js"
+    "static/js/main.7531b87b.chunk.js"
   ]
 }
