@@ -150,7 +150,7 @@ const App: React.FC = () => {
 			onTouchEnd={(e) => {handleTouchEnd(e)}}
 			onTouchMove={(e) => {handleTouchMove(e)}}
 		>
-			<GCView/>
+			<GCView onClick={() => { toggle(false) }} />
 
 			<div className="menu">
 				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>

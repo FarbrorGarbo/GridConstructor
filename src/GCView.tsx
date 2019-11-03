@@ -1,7 +1,7 @@
 import React from "react";
 import GCEngine from "./GCEngine";
 
-const GCView: React.FC = () => {
+const GCView: React.FC<{onClick: () => void}> = (props) => {
 	const canvasElm = React.useRef<HTMLCanvasElement>(null);
 
 	// Lifecycle ComponentDidMount: should only occur once and give us a persistant ref to the canvas.
@@ -17,6 +17,7 @@ const GCView: React.FC = () => {
 		<canvas
 			className={"canvas"}
 			ref={canvasElm}
+			onClick={() => {props.onClick()}}
 		/>
   	);
 }
