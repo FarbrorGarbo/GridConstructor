@@ -62,3 +62,11 @@ input {
   bottom: 0;
   touch-action: none;
 }
+
+.addpoint {
+  position: absolute;
+  top: 30px;
+  background-color: white;
+  padding: 0 10px 15px 10px;
+  touch-action: none;
+}

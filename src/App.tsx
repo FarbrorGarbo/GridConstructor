@@ -1,6 +1,7 @@
 import React from "react";
-import GCEngine, {Settings} from "./GCEngine";
+import GCEngine, {Settings, Vec} from "./GCEngine";
 import GCView from "./GCView";
+import newPoint from "./NewPoint";
 import "./App.css";
 
 const App: React.FC = () => {
@@ -34,6 +35,7 @@ const App: React.FC = () => {
 	const toggleSettings = (event: any) => {
 		event.preventDefault();
 		toggle(!showSettings);
+		showAddPoint(null);
 	}
 
 	// Pan
@@ -141,6 +143,14 @@ const App: React.FC = () => {
 		[touchMovement, touchDistance]
 	);
 
+	// Add a point to the drawing
+	const [addPointInstance, showAddPoint] = React.useState<newPoint | null>(null);
+	const addPoint = () => {
+		if (addPointInstance) showAddPoint(null);
+		else showAddPoint(new newPoint(0, 0, 0, (vector: Vec) => {console.log(vector); showAddPoint(null)}));
+		toggle(false);
+	}
+
 	return (
 		<div
 			className="App"
@@ -150,10 +160,11 @@ const App: React.FC = () => {
 			onTouchEnd={(e) => {handleTouchEnd(e)}}
 			onTouchMove={(e) => {handleTouchMove(e)}}
 		>
-			<GCView onClick={() => { toggle(false) }} />
+			<GCView onClick={() => { toggle(false); showAddPoint(null); }} />
 
 			<div className="menu">
 				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>
+				<button onClick={addPoint}>Add point</button>
 			</div>
 
 			{showSettings &&
@@ -165,6 +176,14 @@ const App: React.FC = () => {
 				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={settings.picturePlane} returnValue={(val) => handleSettings("picturePlane", val)} />
 				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={settings.offsetH} returnValue={(val) => handleSettings("offsetH", val)} />
 				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={settings.offsetV} returnValue={(val) => handleSettings("offsetV", val)} />
+			</div>}
+			{addPointInstance &&
+			<div className="addpoint">
+				<h2>Add point</h2>
+				<GenericNumberInput label="X" value={addPointInstance.x} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.x = val}} />
+				<GenericNumberInput label="Y" value={addPointInstance.y} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.y = val}} />
+				<GenericNumberInput label="Z" value={addPointInstance.z} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.z = val}} />
+				<button onClick={() => addPointInstance.create()}>Create</button>
 			</div>}
 		</div>
 	);

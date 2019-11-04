@@ -2,6 +2,7 @@
 import {gizmoLines} from "./data";
 
 class GCEngine {
+    private _version: string;
     private _settings: Settings;
     private _drawing: Drawing;
     private _canvasElm: HTMLCanvasElement | undefined;
@@ -10,6 +11,7 @@ class GCEngine {
     private _pan: {h: number, v: number};
 
     constructor () {
+        this._version = "0.1.1"
         this._settings = this._getPersistentSettings();
         this._drawing = this._readPersistentDrawing();
         this._scale = 1;
@@ -99,6 +101,12 @@ class GCEngine {
         return {h: H + this._pan.h, v: V - this._pan.v};
     }
 
+    public addPointToDrawing(vector: Vec) {
+        if (this._drawing.points["x" + vector.x + "_y" + vector.y + "_z" + vector.z] !== undefined) return null;
+        this._drawing.points["x" + vector.x + "_y" + vector.y + "_z" + vector.z] = vector;
+        this.draw();
+    }
+
     public getSettings(): Settings {
         return this._settings;
     }
@@ -136,6 +144,7 @@ class GCEngine {
             this._canvasElm.height = window.innerHeight;
             this._cxt = this._canvasElm.getContext("2d");
             this._scale = 1;
+            console.log("version", this._version, this._drawing);
         } else {
             console.warn("Registered canvase element is not of type <canvas>!");
         }
