@@ -11,7 +11,7 @@ class GCEngine {
     private _pan: {h: number, v: number};
 
     constructor () {
-        this._version = "0.1.1"
+        this._version = "0.1.2"
         this._settings = this._getPersistentSettings();
         this._drawing = this._readPersistentDrawing();
         this._scale = 1;
@@ -59,8 +59,8 @@ class GCEngine {
     }
 
     private _drawLine(settings: Settings, useScale: boolean = true, line: Line, color: string) {
-        const calcPointA = this._project(settings, line.start, useScale);
-        const calcPointB = this._project(settings, line.end, useScale);
+        const calcPointA = this.project(settings, line.start, useScale);
+        const calcPointB = this.project(settings, line.end, useScale);
         this._cxt!.strokeStyle = color;
         this._cxt!.beginPath();
         this._cxt!.moveTo(calcPointA.h, this._canvasElm!.height - calcPointA.v);
@@ -87,7 +87,7 @@ class GCEngine {
         drawAxis("#00f", lines[2]);
     }
 
-    private _project (settings: Settings = this._settings, point: Vec, useScale: boolean = true) : Point {
+    public project(settings: Settings = this._settings, point: Vec, useScale: boolean = true) : Point {
         const rot = this._degrees_to_radians(settings.rotation);
         const elev = this._degrees_to_radians(settings.elevation);
         const n = point.x * Math.sin(rot) + point.y * Math.cos(rot);
@@ -99,6 +99,14 @@ class GCEngine {
 
         if (useScale)  return {h: H * this._scale + this._pan.h, v: V * this._scale - this._pan.v};
         return {h: H + this._pan.h, v: V - this._pan.v};
+    }
+
+    public get heightOfDrawing() {
+        return this._canvasElm!.clientHeight;
+    }
+
+    public get drawing() {
+        return this._drawing;
     }
 
     public addPointToDrawing(vector: Vec) {
@@ -144,7 +152,7 @@ class GCEngine {
             this._canvasElm.height = window.innerHeight;
             this._cxt = this._canvasElm.getContext("2d");
             this._scale = 1;
-            console.log("version", this._version, this._drawing);
+            console.log("version", this._version);
         } else {
             console.warn("Registered canvase element is not of type <canvas>!");
         }
@@ -165,8 +173,8 @@ class GCEngine {
             settings.elevation = 0;
             settings.picturePlane = settings.distance;
             this._cxt.fillStyle = "rgb(245,245,245)";
-            const calcPoint1 = this._project(settings, {x:0, y:0, z:settings.docSize.height});
-            const calcPoint2 = this._project(settings, {x:settings.docSize.width, y:0, z:0});
+            const calcPoint1 = this.project(settings, {x:0, y:0, z:settings.docSize.height});
+            const calcPoint2 = this.project(settings, {x:settings.docSize.width, y:0, z:0});
             this._cxt.fillRect(calcPoint1.h - settings.offsetH * this._scale, this._canvasElm!.height - calcPoint1.v + settings.offsetV * this._scale, calcPoint2.h - calcPoint1.h, calcPoint1.v - calcPoint2.v);
 
             this._cxt.strokeStyle = "#aaa";
@@ -178,8 +186,8 @@ class GCEngine {
             ]
 
             lines.forEach(line => {
-                const calcPointA = this._project(settings, line[0]);
-                const calcPointB = this._project(settings, line[1]);
+                const calcPointA = this.project(settings, line[0]);
+                const calcPointB = this.project(settings, line[1]);
                 this._cxt!.beginPath();
                 this._cxt!.moveTo(calcPointA.h - settings.offsetH * this._scale, this._canvasElm!.height - calcPointA.v + settings.offsetV * this._scale);
                 this._cxt!.lineTo(calcPointB.h - settings.offsetH * this._scale, this._canvasElm!.height - calcPointB.v + settings.offsetV * this._scale);
@@ -216,7 +224,7 @@ class GCEngine {
             if (this._drawing) {
                 this._cxt.strokeStyle = "#000";
                 for (const key in this._drawing.points) {
-                    const calc = this._project(this._settings, this._drawing.points[key]);
+                    const calc = this.project(this._settings, this._drawing.points[key]);
                     this._cxt!.beginPath();
                     this._cxt!.arc(calc.h, this._canvasElm!.height - calc.v, 5, 0, 2 * Math.PI);
                     this._cxt!.stroke();

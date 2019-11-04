@@ -1,6 +1,6 @@
 import GCEngine, {Vec} from "./GCEngine";
 
-export default class newPoint {
+export default class NewPoint {
     constructor(
         private _x: number = 0,
         private _y: number = 0,

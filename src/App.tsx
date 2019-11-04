@@ -1,8 +1,9 @@
 import React from "react";
 import GCEngine, {Settings, Vec} from "./GCEngine";
 import GCView from "./GCView";
-import newPoint from "./NewPoint";
+import NewPoint from "./NewPoint";
 import "./App.css";
+import SelectedPoint from "./SelectedPoint";
 
 const App: React.FC = () => {
 	// Settings
@@ -144,11 +145,21 @@ const App: React.FC = () => {
 	);
 
 	// Add a point to the drawing
-	const [addPointInstance, showAddPoint] = React.useState<newPoint | null>(null);
+	const [addPointInstance, showAddPoint] = React.useState<NewPoint | null>(null);
 	const addPoint = () => {
 		if (addPointInstance) showAddPoint(null);
-		else showAddPoint(new newPoint(0, 0, 0, (vector: Vec) => {console.log(vector); showAddPoint(null)}));
+		else showAddPoint(new NewPoint(0, 0, 0, (vector: Vec) => {console.log(vector); showAddPoint(null)}));
 		toggle(false);
+		selectPoint(null);
+	}
+
+	// Select point
+	const [selectedPoint, selectPoint] = React.useState<SelectedPoint | null>(null);
+	const trySelectPoint = (event: React.MouseEvent) => {
+		const sel = new SelectedPoint({h: event.clientX, v: event.clientY});
+		toggle(false);
+		showAddPoint(null);
+		selectPoint(!!sel.id ? sel : null);
 	}
 
 	return (
@@ -160,7 +171,7 @@ const App: React.FC = () => {
 			onTouchEnd={(e) => {handleTouchEnd(e)}}
 			onTouchMove={(e) => {handleTouchMove(e)}}
 		>
-			<GCView onClick={() => { toggle(false); showAddPoint(null); }} />
+			<GCView onClick={(e) => trySelectPoint(e)} />
 
 			<div className="menu">
 				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>
@@ -168,7 +179,7 @@ const App: React.FC = () => {
 			</div>
 
 			{showSettings &&
-			<div className={"settings"} onMouseDown={e => e.stopPropagation()} onMouseMove={e => e.stopPropagation()}>
+			<div className={"dialog"} onMouseDown={e => e.stopPropagation()} onMouseMove={e => e.stopPropagation()}>
 				<h2>Perspektive Settings</h2>
 				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={settings.rotation} returnValue={(val) => handleSettings("rotation", val)} />
 				<GenericNumberInput label={"Elevation"} min={-90} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />
@@ -178,12 +189,17 @@ const App: React.FC = () => {
 				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={settings.offsetV} returnValue={(val) => handleSettings("offsetV", val)} />
 			</div>}
 			{addPointInstance &&
-			<div className="addpoint">
+			<div className="dialog">
 				<h2>Add point</h2>
 				<GenericNumberInput label="X" value={addPointInstance.x} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.x = val}} />
 				<GenericNumberInput label="Y" value={addPointInstance.y} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.y = val}} />
 				<GenericNumberInput label="Z" value={addPointInstance.z} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.z = val}} />
 				<button onClick={() => addPointInstance.create()}>Create</button>
+			</div>}
+			{selectedPoint &&
+			<div className="dialog">
+				<h2>Selected Point</h2>
+				<p>X: {selectedPoint.point!.x} Y: {selectedPoint.point!.y} Z: {selectedPoint.point!.z}</p>
 			</div>}
 		</div>
 	);

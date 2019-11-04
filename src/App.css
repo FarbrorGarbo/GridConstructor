@@ -36,14 +36,6 @@ input {
   touch-action: none;
 }
 
-.settings {
-  position: absolute;
-  top: 30px;
-  background-color: white;
-  padding: 0 10px 15px 10px;
-  touch-action: none;
-}
-
 .menu {
   position: absolute;
   top: 0;
@@ -63,7 +55,7 @@ input {
   touch-action: none;
 }
 
-.addpoint {
+.dialog {
   position: absolute;
   top: 30px;
   background-color: white;
