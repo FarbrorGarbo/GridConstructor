@@ -37,6 +37,7 @@ const App: React.FC = () => {
 		event.preventDefault();
 		toggle(!showSettings);
 		showAddPoint(null);
+		selectPoint(null);
 	}
 
 	// Pan
