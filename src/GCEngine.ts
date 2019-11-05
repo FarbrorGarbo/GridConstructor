@@ -11,7 +11,7 @@ class GCEngine {
     private _pan: {h: number, v: number};
 
     constructor () {
-        this._version = "0.1.2"
+        this._version = "0.1.3"
         this._settings = this._getPersistentSettings();
         this._drawing = this._readPersistentDrawing();
         this._scale = 1;
@@ -113,6 +113,13 @@ class GCEngine {
         if (this._drawing.points["x" + vector.x + "_y" + vector.y + "_z" + vector.z] !== undefined) return null;
         this._drawing.points["x" + vector.x + "_y" + vector.y + "_z" + vector.z] = vector;
         this.draw();
+    }
+
+    public deletePointFromDrawing(id: string) {
+        if (this._drawing.points[id]) {
+            delete this._drawing.points[id];
+            this.draw();
+        }
     }
 
     public getSettings(): Settings {

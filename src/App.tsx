@@ -2,8 +2,8 @@ import React from "react";
 import GCEngine, {Settings, Vec} from "./GCEngine";
 import GCView from "./GCView";
 import NewPoint from "./NewPoint";
+import {SelectedPoint, Selected} from "./SelectedPoint";
 import "./App.css";
-import SelectedPoint from "./SelectedPoint";
 
 const App: React.FC = () => {
 	// Settings
@@ -149,18 +149,27 @@ const App: React.FC = () => {
 	const [addPointInstance, showAddPoint] = React.useState<NewPoint | null>(null);
 	const addPoint = () => {
 		if (addPointInstance) showAddPoint(null);
-		else showAddPoint(new NewPoint(0, 0, 0, (vector: Vec) => {console.log(vector); showAddPoint(null)}));
+		else showAddPoint(new NewPoint(0, 0, 0, (vector: Vec) => {showAddPoint(null)}));
 		toggle(false);
 		selectPoint(null);
 	}
 
 	// Select point
-	const [selectedPoint, selectPoint] = React.useState<SelectedPoint | null>(null);
+	const [selectedPointInstance, selectPoint] = React.useState<Selected | null>(null);
 	const trySelectPoint = (event: React.MouseEvent) => {
-		const sel = new SelectedPoint({h: event.clientX, v: event.clientY});
+		const sel = new Selected({h: event.clientX, v: event.clientY});
 		toggle(false);
 		showAddPoint(null);
 		selectPoint(!!sel.id ? sel : null);
+	}
+
+	// React.useEffect(
+	// 	() => {console.log("changed")},
+	// 	[selectedPointInstance]
+	// );
+
+	const killSelectedPoint = () => {
+		selectPoint(null);
 	}
 
 	return (
@@ -197,16 +206,12 @@ const App: React.FC = () => {
 				<GenericNumberInput label="Z" value={addPointInstance.z} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.z = val}} />
 				<button onClick={() => addPointInstance.create()}>Create</button>
 			</div>}
-			{selectedPoint &&
-			<div className="dialog">
-				<h2>Selected Point</h2>
-				<p>X: {selectedPoint.point!.x} Y: {selectedPoint.point!.y} Z: {selectedPoint.point!.z}</p>
-			</div>}
+			{selectedPointInstance && <SelectedPoint id={selectedPointInstance.id} point={selectedPointInstance.point} deletePoint={selectedPointInstance.delete} killInstance={killSelectedPoint} />}
 		</div>
 	);
 }
 
-type GenericNumberInputProps = {
+export type GenericNumberInputProps = {
 	label: string;
 	min: number;
 	max: number;
@@ -215,7 +220,7 @@ type GenericNumberInputProps = {
 	returnValue(val: number): void;
 }
 
-const GenericNumberInput: React.FC<GenericNumberInputProps> = (props) => {
+export const GenericNumberInput: React.FC<GenericNumberInputProps> = (props) => {
 	const inputRef = React.useRef<HTMLInputElement>(null);
 	const [value, setValue] = React.useState(props.value);
 
