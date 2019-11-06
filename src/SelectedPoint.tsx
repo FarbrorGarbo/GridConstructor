@@ -1,8 +1,8 @@
 import React from "react";
 import GCEngine, {Vec, Point} from "./GCEngine";
-import {GenericNumberInput} from "./App";
+import {GenericNumberInput} from "./GenericNumberInput";
 
-export class Selected {
+export class SelectedPoint {
     private _selectedPointId: string | null;
     private _selectedPoint: Vec | null;
 
@@ -37,23 +37,21 @@ export class Selected {
     }
 }
 
-export type SelectedPointProp = {
-    id: string | null;
-    point: Vec | null;
-    deletePoint: () => void;
+export interface SelectedPointProp {
+    instance: SelectedPoint;
     killInstance: () => void;
 }
 
-export const SelectedPoint: React.FC<SelectedPointProp> = (props) => {
-    const {point, deletePoint, killInstance} = props;
+export const SelectedPointFC: React.FC<SelectedPointProp> = (props) => {
+    const {instance, killInstance} = props;
     return (
         <div className="dialog">
             <h2>Selected Point</h2>
-            <button onClick={() => {deletePoint(); killInstance()}}>Delete</button>
+            <button onClick={() => {instance.delete(); killInstance()}}>Delete</button>
             <div>
-                <GenericNumberInput label={"X"} min={-99999} max={99999} step={0.01} value={point!.x} returnValue={(val) => {point!.x = val; GCEngine.draw()}} />
-                <GenericNumberInput label={"Y"} min={-99999} max={99999} step={0.01} value={point!.y} returnValue={(val) => {point!.y = val; GCEngine.draw()}} />
-                <GenericNumberInput label={"Z"} min={-99999} max={99999} step={0.01} value={point!.z} returnValue={(val) => {point!.z = val; GCEngine.draw()}} />
+                <GenericNumberInput label={"X"} min={-99999} max={99999} step={0.01} value={instance.point!.x} returnValue={(val) => {instance.point!.x = val; GCEngine.draw()}} />
+                <GenericNumberInput label={"Y"} min={-99999} max={99999} step={0.01} value={instance.point!.y} returnValue={(val) => {instance.point!.y = val; GCEngine.draw()}} />
+                <GenericNumberInput label={"Z"} min={-99999} max={99999} step={0.01} value={instance.point!.z} returnValue={(val) => {instance.point!.z = val; GCEngine.draw()}} />
             </div>
         </div>
     );

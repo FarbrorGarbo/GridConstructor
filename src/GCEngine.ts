@@ -11,7 +11,7 @@ class GCEngine {
     private _pan: {h: number, v: number};
 
     constructor () {
-        this._version = "0.1.3"
+        this._version = "0.1.4"
         this._settings = this._getPersistentSettings();
         this._drawing = this._readPersistentDrawing();
         this._scale = 1;

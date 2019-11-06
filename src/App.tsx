@@ -1,8 +1,9 @@
 import React from "react";
 import GCEngine, {Settings, Vec} from "./GCEngine";
 import GCView from "./GCView";
-import NewPoint from "./NewPoint";
-import {SelectedPoint, Selected} from "./SelectedPoint";
+import {GenericNumberInput} from "./GenericNumberInput";
+import {NewPoint, NewPointFC} from "./NewPoint";
+import {SelectedPointFC, SelectedPoint} from "./SelectedPoint";
 import "./App.css";
 
 const App: React.FC = () => {
@@ -31,7 +32,7 @@ const App: React.FC = () => {
 	);
 
 	// Show/hide settings
-	const [showSettings, toggle] = React.useState(false);
+	const [showSettings, toggle] = React.useState<boolean>(false);
 
 	const toggleSettings = (event: any) => {
 		event.preventDefault();
@@ -39,6 +40,11 @@ const App: React.FC = () => {
 		showAddPoint(null);
 		selectPoint(null);
 	}
+
+	React.useEffect(
+		() => {},
+		[showSettings]
+	);
 
 	// Pan
 	const [mousePos, mouseMoved] = React.useState<{x: number, y: number} | null>(null);
@@ -155,21 +161,12 @@ const App: React.FC = () => {
 	}
 
 	// Select point
-	const [selectedPointInstance, selectPoint] = React.useState<Selected | null>(null);
+	const [selectedPointInstance, selectPoint] = React.useState<SelectedPoint | null>(null);
 	const trySelectPoint = (event: React.MouseEvent) => {
-		const sel = new Selected({h: event.clientX, v: event.clientY});
+		const sel = new SelectedPoint({h: event.clientX, v: event.clientY});
 		toggle(false);
 		showAddPoint(null);
 		selectPoint(!!sel.id ? sel : null);
-	}
-
-	// React.useEffect(
-	// 	() => {console.log("changed")},
-	// 	[selectedPointInstance]
-	// );
-
-	const killSelectedPoint = () => {
-		selectPoint(null);
 	}
 
 	return (
@@ -198,55 +195,9 @@ const App: React.FC = () => {
 				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={settings.offsetH} returnValue={(val) => handleSettings("offsetH", val)} />
 				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={settings.offsetV} returnValue={(val) => handleSettings("offsetV", val)} />
 			</div>}
-			{addPointInstance &&
-			<div className="dialog">
-				<h2>Add point</h2>
-				<GenericNumberInput label="X" value={addPointInstance.x} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.x = val}} />
-				<GenericNumberInput label="Y" value={addPointInstance.y} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.y = val}} />
-				<GenericNumberInput label="Z" value={addPointInstance.z} min={-999} max={999} step={1} returnValue={(val) => {addPointInstance.z = val}} />
-				<button onClick={() => addPointInstance.create()}>Create</button>
-			</div>}
-			{selectedPointInstance && <SelectedPoint id={selectedPointInstance.id} point={selectedPointInstance.point} deletePoint={selectedPointInstance.delete} killInstance={killSelectedPoint} />}
+			{addPointInstance && <NewPointFC instance={addPointInstance} killInstance={() => showAddPoint(null)} />}
+			{selectedPointInstance && <SelectedPointFC instance={selectedPointInstance} killInstance={() => selectPoint(null)} />}
 		</div>
-	);
-}
-
-export type GenericNumberInputProps = {
-	label: string;
-	min: number;
-	max: number;
-	step: number;
-	value: number;
-	returnValue(val: number): void;
-}
-
-export const GenericNumberInput: React.FC<GenericNumberInputProps> = (props) => {
-	const inputRef = React.useRef<HTMLInputElement>(null);
-	const [value, setValue] = React.useState(props.value);
-
-	const updateValue = () => {
-		let  newValue = parseInt(inputRef.current!.value === "" ? "0" : inputRef.current!.value);
-		if (newValue < props.min) newValue = props.min;
-		else if (newValue > props.max) newValue = props.max;
-		setValue(newValue);
-	}
-
-	const {returnValue} = props;
-
-	React.useEffect( () => { returnValue(value) }, [returnValue, value] );
-
-	return (
-		<label>{props.label}:
-			<input
-				ref={inputRef}
-				type="number"
-				min={props.min}
-				max={props.max}
-				step={props.step}
-				onChange={() => updateValue()}
-				value={value.toString()}
-			/>
-		</label>
 	);
 }
 
