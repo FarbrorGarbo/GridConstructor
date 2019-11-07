@@ -71,8 +71,8 @@ class GCEngine {
     private _drawGizmo() {
         if (!this._cxt) return;
         let settings = {...this._settings};
-        settings.distance = 1000;
-        settings.picturePlane = 1000;
+        settings.distance = 999999;
+        settings.picturePlane = 999999;
 
         const drawAxis = (color: string, lines: Line[]) => {
             this._cxt!.strokeStyle = color;
@@ -127,8 +127,11 @@ class GCEngine {
     }
 
     public setSettings(settings: Settings) {
-        this._settings = settings;
-        localStorage.setItem("gc_settings", JSON.stringify(settings));
+        if (JSON.stringify(this._settings) !== JSON.stringify(settings)) {
+            this._settings = settings;
+            localStorage.setItem("gc_settings", JSON.stringify(this._settings));
+            this.draw();
+		}
     }
 
     public setCanvasSize() {

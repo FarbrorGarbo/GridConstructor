@@ -1,50 +1,25 @@
 import React from "react";
-import GCEngine, {Settings, Vec} from "./GCEngine";
+import GCEngine, {Vec} from "./GCEngine";
 import GCView from "./GCView";
-import {GenericNumberInput} from "./GenericNumberInput";
 import {NewPoint, NewPointFC} from "./NewPoint";
 import {SelectedPointFC, SelectedPoint} from "./SelectedPoint";
 import "./App.css";
+import { SettingsDialogFC, SettingsDialog } from "./SettingsDialog";
 
 const App: React.FC = () => {
-	// Settings
-	const [settings, updateSettings] = React.useState<Settings>(GCEngine.getSettings());
-
-	const handleSettings = (key: string, value: number) => {
-		if (settings) {
-			let settingsCopy: Settings = {...settings};
-		switch (key) {
-			case "rotation": settingsCopy.rotation = value; break;
-			case "elevation": settingsCopy.elevation = value; break;
-			case "distance": settingsCopy.distance = value; break;
-			case "picturePlane": settingsCopy.picturePlane = value; break;
-			case "offsetH": settingsCopy.offsetH = value; break;
-			case "offsetV": settingsCopy.offsetV = value; break;
-		}
-		if (JSON.stringify(settings) !== JSON.stringify(settingsCopy))
-			updateSettings(settingsCopy);
-		}
-	}
-
-	React.useEffect(
-		() => { GCEngine.setSettings(settings) },
-		[settings]
-	);
-
 	// Show/hide settings
-	const [showSettings, toggle] = React.useState<boolean>(false);
+	const [settingsInstance, setSettingsInstance] = React.useState<SettingsDialog | null>(null);
 
 	const toggleSettings = (event: any) => {
 		event.preventDefault();
-		toggle(!showSettings);
+		if (settingsInstance) {
+			setSettingsInstance(null);
+		} else {
+			setSettingsInstance(new SettingsDialog());
+		}
 		showAddPoint(null);
 		selectPoint(null);
 	}
-
-	React.useEffect(
-		() => {},
-		[showSettings]
-	);
 
 	// Pan
 	const [mousePos, mouseMoved] = React.useState<{x: number, y: number} | null>(null);
@@ -87,7 +62,7 @@ const App: React.FC = () => {
 				window.removeEventListener('resize', onResize);
 			}
 		},
-		[mousePos, settings]
+		[mousePos]
 	);
 
 	// Handle touch events for zooming and scaling
@@ -156,7 +131,7 @@ const App: React.FC = () => {
 	const addPoint = () => {
 		if (addPointInstance) showAddPoint(null);
 		else showAddPoint(new NewPoint(0, 0, 0, (vector: Vec) => {showAddPoint(null)}));
-		toggle(false);
+		setSettingsInstance(null);
 		selectPoint(null);
 	}
 
@@ -164,7 +139,7 @@ const App: React.FC = () => {
 	const [selectedPointInstance, selectPoint] = React.useState<SelectedPoint | null>(null);
 	const trySelectPoint = (event: React.MouseEvent) => {
 		const sel = new SelectedPoint({h: event.clientX, v: event.clientY});
-		toggle(false);
+		setSettingsInstance(null);
 		showAddPoint(null);
 		selectPoint(!!sel.id ? sel : null);
 	}
@@ -181,20 +156,11 @@ const App: React.FC = () => {
 			<GCView onClick={(e) => trySelectPoint(e)} />
 
 			<div className="menu">
-				<button onClick={toggleSettings}>{showSettings ? "Back" : "Settings"}</button>
+				<button onClick={toggleSettings}>{settingsInstance ? "Back" : "Settings"}</button>
 				<button onClick={addPoint}>Add point</button>
 			</div>
 
-			{showSettings &&
-			<div className={"dialog"} onMouseDown={e => e.stopPropagation()} onMouseMove={e => e.stopPropagation()}>
-				<h2>Perspektive Settings</h2>
-				<GenericNumberInput label={"Rotation"} min={0} max={359} step={5} value={settings.rotation} returnValue={(val) => handleSettings("rotation", val)} />
-				<GenericNumberInput label={"Elevation"} min={-90} max={90} step={5} value={settings.elevation} returnValue={(val) => handleSettings("elevation", val)} />
-				<GenericNumberInput label={"Distance"} min={0} max={999999} step={50} value={settings.distance} returnValue={(val) => handleSettings("distance", val)} />
-				<GenericNumberInput label={"Distance to Picture Plane"} min={0} max={999999} step={50} value={settings.picturePlane} returnValue={(val) => handleSettings("picturePlane", val)} />
-				<GenericNumberInput label={"Offset Horisontal"} min={0} max={999999} step={5} value={settings.offsetH} returnValue={(val) => handleSettings("offsetH", val)} />
-				<GenericNumberInput label={"Offset Vertical"} min={0} max={999999} step={5} value={settings.offsetV} returnValue={(val) => handleSettings("offsetV", val)} />
-			</div>}
+			{settingsInstance && <SettingsDialogFC instance={settingsInstance} killInstance={() => setSettingsInstance(null)} />}
 			{addPointInstance && <NewPointFC instance={addPointInstance} killInstance={() => showAddPoint(null)} />}
 			{selectedPointInstance && <SelectedPointFC instance={selectedPointInstance} killInstance={() => selectPoint(null)} />}
 		</div>
