@@ -9,6 +9,8 @@ class GCEngine {
     private _cxt: CanvasRenderingContext2D | null;
     private _scale: number;
     private _pan: {h: number, v: number};
+    public selectedPoint: Vec | null;
+    public previewPoint: Vec | null;
 
     constructor () {
         this._version = "0.1.4"
@@ -17,6 +19,8 @@ class GCEngine {
         this._scale = 1;
         this._pan = {h: window.innerWidth/2, v: -window.innerHeight/2};
         this._cxt = null;
+        this.selectedPoint = null;
+        this.previewPoint = null;
     }
 
     private _getInitialSettings () : Settings {
@@ -46,7 +50,7 @@ class GCEngine {
         const value = !localStorageData
                 ? {	// Default empty drawing with one point i origo
                     points: {
-                        "x0_y0_z0": {x: 0, y: 0, z: 0}
+                        "0,0,0": {x: 0, y: 0, z: 0}
                     }
                 }
                 : JSON.parse(localStorageData);
@@ -109,9 +113,14 @@ class GCEngine {
         return this._drawing;
     }
 
-    public addPointToDrawing(vector: Vec) {
-        if (this._drawing.points["x" + vector.x + "_y" + vector.y + "_z" + vector.z] !== undefined) return null;
-        this._drawing.points["x" + vector.x + "_y" + vector.y + "_z" + vector.z] = vector;
+    public addPointToDrawing(vector: Vec, id?: string) {
+        if (id) {
+            this._drawing.selectedPoint = vector;
+        } else {
+            if (this._drawing.points["" + vector.x + "," + vector.y + "," + vector.z] !== undefined) return null;
+            this._drawing.points["" + vector.x + "," + vector.y + "," + vector.z] = vector;
+        }
+        console.log(this._drawing);
         this.draw();
     }
 
@@ -239,6 +248,13 @@ class GCEngine {
                     this._cxt!.arc(calc.h, this._canvasElm!.height - calc.v, 5, 0, 2 * Math.PI);
                     this._cxt!.stroke();
                 }
+                this._cxt.strokeStyle = "#d00";
+                if (this.previewPoint) {
+                    const calc = this.project(this._settings, this.previewPoint);
+                    this._cxt!.beginPath();
+                    this._cxt!.arc(calc.h, this._canvasElm!.height - calc.v, 5, 0, 2 * Math.PI);
+                    this._cxt!.stroke();
+                }
             }
         }
     }
@@ -273,7 +289,8 @@ export type Line = {
 export type Drawing = {
     points: {
         [key: string] : Vec
-    }
+    },
+    selectedPoint?: Vec
 }
 
 export default new GCEngine ();

@@ -1,14 +1,16 @@
 import React from "react";
-import GCEngine, {Vec} from "./GCEngine";
+import GCEngine from "./GCEngine";
 import {GenericNumberInput} from "./GenericNumberInput";
 
 export class NewPoint {
     constructor(
         private _x: number = 0,
         private _y: number = 0,
-        private _z: number = 0,
-        public callBack: (vector: Vec) => void
-        ) {}
+        private _z: number = 0
+        ) {
+            GCEngine.previewPoint = {x: 0, y: 0, z: 0};
+            GCEngine.draw();
+        }
 
     public get x() {
         return this._x;
@@ -16,6 +18,10 @@ export class NewPoint {
 
     public set x(val: number) {
         this._x = val;
+        if (GCEngine.previewPoint) {
+            GCEngine.previewPoint.x = val;
+        }
+        GCEngine.draw();
     }
 
     public get y() {
@@ -24,6 +30,10 @@ export class NewPoint {
 
     public set y(val: number) {
         this._y = val;
+        if (GCEngine.previewPoint) {
+            GCEngine.previewPoint.y = val;
+        }
+        GCEngine.draw();
     }
 
     public get z() {
@@ -32,11 +42,19 @@ export class NewPoint {
 
     public set z(val: number) {
         this._z = val;
+        if (GCEngine.previewPoint) {
+            GCEngine.previewPoint.z = val;
+        }
+        GCEngine.draw();
     }
 
     public create() {
-        this.callBack({x: this._x, y: this._y, z: this._z});
         GCEngine.addPointToDrawing({x: this._x, y: this._y, z: this._z});
+    }
+
+    public cleanUp() {
+        GCEngine.previewPoint = null;
+        GCEngine.draw();
     }
 }
 

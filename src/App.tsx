@@ -1,10 +1,10 @@
 import React from "react";
-import GCEngine, {Vec} from "./GCEngine";
+import GCEngine from "./GCEngine";
 import GCView from "./GCView";
 import {NewPoint, NewPointFC} from "./NewPoint";
 import {SelectedPointFC, SelectedPoint} from "./SelectedPoint";
+import {SettingsDialogFC, SettingsDialog} from "./SettingsDialog";
 import "./App.css";
-import { SettingsDialogFC, SettingsDialog } from "./SettingsDialog";
 
 const App: React.FC = () => {
 	// Show/hide settings
@@ -18,7 +18,10 @@ const App: React.FC = () => {
 			setSettingsInstance(new SettingsDialog());
 		}
 		showAddPoint(null);
-		selectPoint(null);
+		if (selectedPointInstance) {
+			selectedPointInstance.cleanUp();
+			selectPoint(null);
+		}
 	}
 
 	// Pan
@@ -129,20 +132,41 @@ const App: React.FC = () => {
 	// Add a point to the drawing
 	const [addPointInstance, showAddPoint] = React.useState<NewPoint | null>(null);
 	const addPoint = () => {
-		if (addPointInstance) showAddPoint(null);
-		else showAddPoint(new NewPoint(0, 0, 0, (vector: Vec) => {showAddPoint(null)}));
+		if (selectedPointInstance) {
+			selectedPointInstance.cleanUp();
+			selectPoint(null);
+		}
 		setSettingsInstance(null);
-		selectPoint(null);
+		if (addPointInstance) showAddPoint(null);
+		else showAddPoint(new NewPoint(0, 0, 0));
 	}
 
 	// Select point
+	const [selectedId, setSelectedId] = React.useState<string>("");
 	const [selectedPointInstance, selectPoint] = React.useState<SelectedPoint | null>(null);
 	const trySelectPoint = (event: React.MouseEvent) => {
-		const sel = new SelectedPoint({h: event.clientX, v: event.clientY});
+		// Close settings and add point panels
 		setSettingsInstance(null);
 		showAddPoint(null);
-		selectPoint(!!sel.id ? sel : null);
+
+		// Reset any currently selected point
+		if (selectedPointInstance) {
+			selectedPointInstance.cleanUp();
+			selectPoint(null);
+		}
+
+		setSelectedId( SelectedPoint.pointIdAtPosition({h: event.clientX, v: event.clientY}) );
 	}
+
+	React.useEffect(
+		() => {
+			if (selectedId !== "") {
+				const sel = new SelectedPoint(selectedId);
+				selectPoint(sel);
+			}
+		},
+		[selectedId]
+	);
 
 	return (
 		<div
@@ -161,8 +185,8 @@ const App: React.FC = () => {
 			</div>
 
 			{settingsInstance && <SettingsDialogFC instance={settingsInstance} killInstance={() => setSettingsInstance(null)} />}
-			{addPointInstance && <NewPointFC instance={addPointInstance} killInstance={() => showAddPoint(null)} />}
-			{selectedPointInstance && <SelectedPointFC instance={selectedPointInstance} killInstance={() => selectPoint(null)} />}
+			{addPointInstance && <NewPointFC instance={addPointInstance} killInstance={() => {addPointInstance.cleanUp(); showAddPoint(null)}} />}
+			{selectedPointInstance && <SelectedPointFC instance={selectedPointInstance} killInstance={() => {selectedPointInstance.cleanUp(); selectPoint(null); setSelectedId("")}} />}
 		</div>
 	);
 }
