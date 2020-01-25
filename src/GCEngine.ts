@@ -14,8 +14,8 @@ class GCEngine {
 
     constructor () {
         this._version = "0.1.4"
-        this._settings = this._getPersistentSettings();
-        this._drawing = this._readPersistentDrawing();
+        this._settings = this._getPersistentData("gc_settings", this._getInitialSettings());
+        this._drawing = this._getPersistentData("gc_current_drawing", {points: {"0,0,0": {x: 0, y: 0, z: 0}}});
         this._scale = 1;
         this._pan = {h: window.innerWidth/2, v: -window.innerHeight/2};
         this._cxt = null;
@@ -35,24 +35,10 @@ class GCEngine {
         }
     }
 
-    private _getPersistentSettings = () => {
-        // localStorage.setItem("gc_settings", "");
-        const localStorageData: string | null = localStorage.getItem("gc_settings");
+    private _getPersistentData = (key: string, defaultData: any) => {
+        const localStorageData: string | null = localStorage.getItem(key);
         const value = !localStorageData
-                ? this._getInitialSettings()
-                : JSON.parse(localStorageData);
-    
-        return value;
-    }
-    
-    private _readPersistentDrawing = () => {
-        const localStorageData: string | null = localStorage.getItem("gc_current_drawing");
-        const value = !localStorageData
-                ? {	// Default empty drawing with one point i origo
-                    points: {
-                        "0,0,0": {x: 0, y: 0, z: 0}
-                    }
-                }
+                ? defaultData
                 : JSON.parse(localStorageData);
     
         return value;
