@@ -150,7 +150,7 @@ class GCEngine {
         this._pan.v += y / window.devicePixelRatio;
     }
 
-    public registerCanvas(canvasElm: HTMLCanvasElement) {
+    public registerCanvas(canvasElm?: HTMLCanvasElement) {
         if (canvasElm && canvasElm.getContext) {
             this._canvasElm = canvasElm;
             this._canvasElm.width = window.innerWidth;
