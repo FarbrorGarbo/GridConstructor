@@ -91,7 +91,7 @@ export interface SelectedPointProp {
 
 export const SelectedPointFC: React.FC<SelectedPointProp> = (props) => {
     const {instance, killInstance} = props;
-    GCEngine.draw();
+    React.useEffect(() => { GCEngine.draw(); }, []);
     return (
         <div className="dialog">
             <h2>Selected Point</h2>

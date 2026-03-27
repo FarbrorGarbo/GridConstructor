@@ -20,7 +20,7 @@ class GCEngine {
         this._settings = this._getPersistentData("gc_settings", this._getInitialSettings());
         this._drawing = this._getPersistentData("gc_current_drawing", {points: {"0,0,0": {x: 0, y: 0, z: 0}}});
         this._scale = 1;
-        this._pan = {h: window.innerWidth/2, v: -window.innerHeight/2};
+        this._pan = {h: typeof window !== 'undefined' ? window.innerWidth/2 : 0, v: typeof window !== 'undefined' ? -window.innerHeight/2 : 0};
         this._cxt = null;
         this.selectedPoint = null;
         this.previewPoint = null;
@@ -39,12 +39,9 @@ class GCEngine {
     }
 
     private _getPersistentData = (key: string, defaultData: any) => {
-        const localStorageData: string | null = localStorage?.getItem(key);
-        const value = !localStorageData
-                ? defaultData
-                : JSON.parse(localStorageData);
-    
-        return value;
+        if (typeof window === 'undefined') return defaultData;
+        const localStorageData: string | null = localStorage.getItem(key);
+        return !localStorageData ? defaultData : JSON.parse(localStorageData);
     }
 
     private _degrees_to_radians = (degrees: number) => {
@@ -95,7 +92,7 @@ class GCEngine {
     }
 
     public get heightOfDrawing() {
-        return this._canvasElm!.clientHeight;
+        return this._canvasElm?.clientHeight ?? 0;
     }
 
     public get drawing() {
@@ -127,13 +124,13 @@ class GCEngine {
     public setSettings(settings: Settings) {
         if (JSON.stringify(this._settings) !== JSON.stringify(settings)) {
             this._settings = settings;
-            localStorage.setItem("gc_settings", JSON.stringify(this._settings));
+            if (typeof window !== 'undefined') localStorage.setItem("gc_settings", JSON.stringify(this._settings));
             this.draw();
-		}
+        }
     }
 
     public setCanvasSize() {
-        if (this._canvasElm?.getContext) {
+        if (this._canvasElm?.getContext && typeof window !== 'undefined') {
             this._canvasElm.width = window.innerWidth;
             this._canvasElm.height = window.innerHeight;
         }
@@ -149,12 +146,13 @@ class GCEngine {
     }
 
     public pan(x: number, y: number) {
-        this._pan.h += x / window.devicePixelRatio ;
-        this._pan.v += y / window.devicePixelRatio;
+        const dpr = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+        this._pan.h += x / dpr;
+        this._pan.v += y / dpr;
     }
 
     public registerCanvas(canvasElm?: HTMLCanvasElement) {
-        if (canvasElm?.getContext) {
+        if (canvasElm?.getContext && typeof window !== 'undefined') {
             this._canvasElm = canvasElm;
             this._canvasElm.width = window.innerWidth;
             this._canvasElm.height = window.innerHeight;
@@ -162,21 +160,21 @@ class GCEngine {
             this._scale = 1;
             console.log("version", this._version);
         } else {
-            console.warn("Registered canvase element is not of type <canvas>!");
+            console.warn("Registered canvas element is not of type <canvas>!");
         }
     }
 
     public draw() { // settings: Settings = this._settings, drawing?: Drawing) {
-        if (this._canvasElm && this._cxt) {
-			this._canvasElm.width = window.innerWidth; // settings.viewPortSize.width;
-            this._canvasElm.height = window.innerHeight; // settings.viewPortSize.height;
+        if (this._canvasElm && this._cxt && typeof window !== 'undefined') {
+            this._canvasElm.width = window.innerWidth;
+            this._canvasElm.height = window.innerHeight;
 
             // Clear by drawing document background
             this._cxt.fillStyle = "rgb(231, 230, 227)";
             this._cxt.fillRect(0, 0, this._canvasElm.width, this._canvasElm.height);
 
             // Draw size of document
-            let settings = {...this._settings};
+            const settings = {...this._settings};
             settings.rotation = 0;
             settings.elevation = 0;
             settings.picturePlane = settings.distance;

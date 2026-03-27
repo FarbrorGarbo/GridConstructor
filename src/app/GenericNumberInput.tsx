@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 export type GenericNumberInputProps = {
@@ -14,7 +16,7 @@ export const GenericNumberInput: React.FC<GenericNumberInputProps> = (props) => 
 	const [value, setValue] = React.useState(props.value);
 
 	const updateValue = () => {
-		let  newValue = parseInt(inputRef.current!.value === "" ? "0" : inputRef.current!.value);
+		let newValue = parseFloat(inputRef.current!.value === "" ? "0" : inputRef.current!.value);
 		if (newValue < props.min) newValue = props.min;
 		else if (newValue > props.max) newValue = props.max;
 		setValue(newValue);
